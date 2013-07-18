@@ -22,3 +22,14 @@ using DataFrames
 
 df = DataFrame(x = 1:length(rel_errs), y = rel_errs)
 p = plot(df, x = "x", y = "y", Geom.line)
+draw(D3("jellyfish.js", 6inch, 6inch), p)
+
+
+using Benchmark
+M = get_low_rank(100, 10, 3)
+j1() = jellyfish_1(M, num_iter = 100000, all_errs = false)
+benchmark(j1, "j1", 3)
+
+
+M2 = jellyfish_2(M, num_iter = 100)
+rel_err(M, M2)
