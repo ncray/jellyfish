@@ -5,6 +5,13 @@ Pkg.add("Gadfly")
 Pkg.add("Color")
 Pkg.add("DataFrames")
 
+Pkg.add("Options")
+Pkg.add("Calculus")
+Pkg.add("Distributions")
+Pkg.add("Stats")
+
+
+
 include("jellyfish.jl")
 
 M = get_low_rank(100, 100, 3)
@@ -26,10 +33,11 @@ draw(D3("jellyfish.js", 6inch, 6inch), p)
 
 
 using Benchmark
-M = get_low_rank(100, 10, 3)
+M = get_low_rank(100, 100, 3)
 j1() = jellyfish_1(M, num_iter = 100000, all_errs = false)
 benchmark(j1, "j1", 3)
 
 
-M2 = jellyfish_2(M, num_iter = 100)
+@time jellyfish_1(M, num_iter = 100000, all_errs = false)
+@time M2 = jellyfish_2(M, num_iter = 8)
 rel_err(M, M2)
