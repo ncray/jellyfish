@@ -8,7 +8,7 @@ function get_low_rank(n_r = 10, # number of rows
     Y_l = randn(n_r, r)
     Y_r = randn(n_c, r)
     M = Y_l * Y_r'
-    M / sqrt(mean(M.^2))
+    M / sqrt(mean(M .^ 2))
 end
 
 ## basic version
@@ -19,8 +19,7 @@ function jellyfish_1(M,                        # target matrix
                      alpha_k = .01,            # learning rate
                      num_iter = 10000,         # number of iterations
                      L = randn(size(M, 1), r), # initial guess for L
-                     R = randn(size(M, 2), r), # initial guess for R
-                     all_errs = true) 
+                     R = randn(size(M, 2), r)) # initial guess for R
     n_r = size(M, 1)
     n_c = size(M, 2)
     rel_errs = zeros(num_iter)
@@ -31,17 +30,37 @@ function jellyfish_1(M,                        # target matrix
         resid = alpha_k * 2 * (L[i, :] * R[j, :]' - M[i, j])
         L[i, :], R[j, :] = (1 - mu * alpha_k / n_r) * L[i, :] - resid * R[j, :],
         (1 - mu * alpha_k / n_c) * R[j, :] - resid * L[i, :]
-        
-        if all_errs
-            rel_errs[k] = rel_err(L * R', M)
+    end
+    
+    (L * R', L, R)
+end
+
+## basic version
+## new permutation on each iteration of rows/columns
+function jellyfish_2(M,                        # target matrix
+                     r = 3;                    # guess of rank
+                     mu = 1,                   # regularization parameter
+                     alpha_k = .01,            # learning rate
+                     num_iter = 10000,         # number of iterations
+                     L = randn(size(M, 1), r), # initial guess for L
+                     R = randn(size(M, 2), r)) # initial guess for R
+    n_r = size(M, 1)
+    n_c = size(M, 2)
+    rel_errs = zeros(num_iter)
+    
+    for k = 1:num_iter
+        perm_i = randperm(n_r)
+        perm_j = randperm(n_c)
+        for i in perm_i
+            for j in perm_j
+                resid = alpha_k * 2 * (L[i, :] * R[j, :]' - M[i, j])
+                L[i, :], R[j, :] = (1 - mu * alpha_k / n_r) * L[i, :] - resid * R[j, :],
+                (1 - mu * alpha_k / n_c) * R[j, :] - resid * L[i, :]
+            end
         end
     end
-    #L * R', rel_errs ## REPL fills up when returning a tuple
-    if all_errs
-        rel_errs
-    else
-        rel_err(L * R', M)
-    end
+    
+    (L * R', L, R)
 end
 
 function get_chunks(n_r, n_c, p)
@@ -86,7 +105,7 @@ end
 
 ## basic version
 ## permute rows/columns
-function jellyfish_2(M,                        # target matrix
+function jellyfish_3(M,                        # target matrix
                      r = 3;                    # guess of rank
                      p = 3,                    # number of processors
                      mu = 1,                   # regularization parameter
