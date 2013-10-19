@@ -1,15 +1,8 @@
-function rel_err(X1, X2)
-    normfro(X1 - X2) / normfro(X2)
-end
+module Jellyfish
 
-function get_low_rank(n_r = 10, # number of rows
-                      n_c = 10, # number of columns
-                      r = 3)    # rank
-    Y_l = randn(n_r, r)
-    Y_r = randn(n_c, r)
-    M = Y_l * Y_r'
-    M / sqrt(mean(M .^ 2))
-end
+include("utils.jl")
+
+export jellyfish_1, rel_err, get_low_rank
 
 ## basic version
 ## random sampling of rows/columns
@@ -172,7 +165,7 @@ function jellyfish_4(M,                        # target matrix
                 inds = chunks[1][i], chunks[2][j]
                 push!(refs, @spawn gradient_updates(M[inds[1], inds[2]], L[inds[1], 1:r], R[inds[2], 1:r], r, mu, alpha_k, n_r, n_c))
             end
-                      
+            
             for (i, j) in ab
                 inds = chunks[1][i], chunks[2][j]
                 L[inds[1], 1:r], R[inds[2], 1:r] = fetch(shift!(refs))
@@ -215,5 +208,5 @@ end
 ## end
 
 
-
+end
 

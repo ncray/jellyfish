@@ -10,13 +10,13 @@ Pkg.add("Calculus")
 Pkg.add("Distributions")
 Pkg.add("Stats")
 
-include("src/jellyfish.jl")
+include("../src/jellyfish.jl")
 
 M = get_low_rank(100, 100, 3)
 U, S, V = svd(M)
 
 ## reality check, make sure error is low when you feed in truth from SVD
-M2 = jellyfish_1(M, num_iter = 100, L = U * sqrt(diagm(S)), R = (sqrt(diagm(S)) * V')')[1]
+M2 = jellyfish_1(M, num_iter = 1000, L = U * sqrt(diagm(S)), R = (sqrt(diagm(S)) * V')')[1]
 @assert rel_err(M, M2) < .01
 
 using Benchmark
@@ -31,8 +31,7 @@ rel_err(jellyfish_3(M, num_iter = num_iter)[1], M)
 rel_err(jellyfish_3(M, num_iter = num_iter, p = 1)[1], M)
 rel_err(jellyfish_4(M, num_iter = num_iter, p = 3)[1], M)
 
-include("src/jellyfish.jl")
-require("src/jellyfish.jl")
+require("../src/jellyfish.jl")
 [rel_err(jellyfish_3(M, num_iter = num_iter, p = i)[1], M) for i in 1:100]
 
 
